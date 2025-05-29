@@ -26,3 +26,18 @@
 
 - **Early Phase:** Use public image links.
 - **Later Phase:** Switch to Azure Blob Storage with SAS-token-protected private links.
+
+--
+
+## Navbar Component
+- Refactored navbar links into a reusable `<NavLinkPill />` component.
+- Uses `useLocation()` to highlight active routes.
+- Handles prefix path matching (e.g., `/view/123` matches `/view`).
+- Default style: blue pill with hover. Active: white pill with blue text.
+
+## Routing Behavior
+- Home (`/`) will always match `startsWith("/")`, so had to special-case it.
+- Consider wrapping routes with a `MainLayout` in the future.
+
+## Idea Added (Phase 2)
+- Add a button or route for "Random Recipe" feature — will pull any recipe at random with no prior filters.
