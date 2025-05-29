@@ -1,5 +1,3 @@
-// src/pages/Home.jsx
 export default function AddRecipe() {
-    return <div>Welcome to the AddRecipe Page</div>;
-
+    return <h1 className="text-xl font-bold">Add Recipe Page</h1>;
 }
