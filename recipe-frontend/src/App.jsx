@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import AddRecipe from './pages/AddRecipe';
 import ViewRecipes from './pages/ViewRecipes';
 import Login from './pages/Login';
+import ViewRecipe from "./pages/ViewRecipe";
 
 function App() {
     return (
@@ -14,6 +15,8 @@ function App() {
                 <Route path="/add" element={<AddRecipe />} />
                 <Route path="/view" element={<ViewRecipes />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/recipe/:id" element={<ViewRecipe />} />
+                <Route path="/view/:id" element={<ViewRecipe />} />
             </Routes>
         </Router>
     );
