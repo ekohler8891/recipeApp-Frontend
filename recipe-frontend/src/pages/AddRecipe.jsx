@@ -21,68 +21,68 @@ export default function AddRecipe() {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const { title, description, ingredients, steps } = formData;
+        // Reset messages
+        setError("");
+        setSuccess("");
 
-        // 🔸 Basic validation
-        if (!title || !description || !ingredients || !steps) {
-            setError("All fields are required.");
+        // Trim input values
+        const title = formData.title.trim();
+        const description = formData.description.trim();
+        const ingredientsInput = formData.ingredients.trim();
+        const stepsInput = formData.steps.trim();
+
+        // Basic validation
+        if (!title || !description || !ingredientsInput || !stepsInput) {
+            setError("All fields are required and must not be empty.");
             return;
         }
-
-        setError(""); // Clear previous error if any
 
         const recipe = {
             title,
             description,
-            ingredients: ingredients.split(",").map((item) => item.trim()),
-            steps: steps.split("\n").map((step) => step.trim())
+            ingredients: ingredientsInput.split(",").map((i) => i.trim()).filter(Boolean),
+            steps: stepsInput.split("\n").map((s) => s.trim()).filter(Boolean)
         };
 
-        const storedRecipes = JSON.parse(localStorage.getItem("recipes") || "[]");
-        storedRecipes.push(recipe);
-        localStorage.setItem("recipes", JSON.stringify(storedRecipes));
+        if (recipe.ingredients.length < 1 || recipe.steps.length < 1) {
+            setError("Please include at least one ingredient and one step.");
+            return;
+        }
 
-        console.log("Recipe saved:", recipe);
-
-        // Saved recipe message
-        setSuccess("Recipe Saved!");
-        setTimeout(() => setSuccess(""), 3000);
-
-        /* wiring submit to backend
-
-        --ToDo--
-
-        fetch("https://your-backend-url.com/api/recipes", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(recipe)
-        })
-            .then(res => {
-                if (!res.ok) throw new Error("Failed to save");
-                return res.json();
-            })
-            .then(data => {
-                console.log("Saved to backend:", data);
-                setSuccess("Recipe saved!");
-            })
-            .catch(err => {
-                console.error(err);
-                setError("Failed to save recipe.");
+        try {
+            const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/recipe`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(recipe)
             });
 
-        */
+            if (!response.ok) throw new Error("Failed to save recipe.");
 
-        // Reset form
-        setFormData({
-            title: "",
-            description: "",
-            ingredients: "",
-            steps: ""
-        });
+            const savedRecipe = await response.json();
+            console.log("Saved to backend:", savedRecipe);
+
+            setSuccess("Recipe saved successfully!");
+
+            // Reset form
+            setFormData({
+                title: "",
+                description: "",
+                ingredients: "",
+                steps: ""
+            });
+
+            setTimeout(() => setSuccess(""), 3000);
+        } catch (err) {
+            console.error(err);
+            setError("There was a problem saving your recipe.");
+        }
     };
+
 
     return (
         <div className="max-w-xl mx-auto p-4">
