@@ -1,12 +1,14 @@
 import { useState } from "react";
 import Layout from "../components/Layout";
 
+
 export default function AddRecipe() {
     const [formData, setFormData] = useState({
         title: "",
         description: "",
         ingredients: "",
-        steps: ""
+        steps: "",
+        imagePath: ""
     });
 
     //images
@@ -36,6 +38,7 @@ export default function AddRecipe() {
         const description = formData.description.trim();
         const ingredientsInput = formData.ingredients.trim();
         const stepsInput = formData.steps.trim();
+        const formDataImage = new FormData();
 
         if (!title || !description || !ingredientsInput || !stepsInput) {
             setError("All fields are required.");
@@ -52,14 +55,21 @@ export default function AddRecipe() {
 
         // ✅ Upload image if selected
         if (imageFile) {
-            const formDataImage = new FormData();
+            
             formDataImage.append("file", imageFile);
 
             try {
-                const uploadRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/recipe/upload`, {
+                console.log("Uploading image file:", imageFile);
+                console.log("FormData entries:");
+                for (let pair of formDataImage.entries()) {
+                    console.log(pair[0], pair[1]);
+                }
+
+                const uploadRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/recipe/upload-new`, {
                     method: "POST",
                     body: formDataImage
                 });
+
 
                 if (!uploadRes.ok) throw new Error("Image upload failed");
 
