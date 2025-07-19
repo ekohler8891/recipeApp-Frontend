@@ -34,3 +34,6 @@ The following core features are working and fully wired to the backend:
 2. Create a `.env` file:
    ```env
    REACT_APP_API_BASE_URL=http://localhost:5155/api
+3. Run the frontend		
+	npm install
+	npm start
