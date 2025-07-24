@@ -1,11 +1,20 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
-
+function useQuery() {
+    return new URLSearchParams(useLocation().search);
+}
 
 export default function ViewRecipes() {
     const [recipes, setRecipes] = useState([]);
     const [error, setError] = useState("");
+    //search bar
+    const query = useQuery();
+    const searchTerm = query.get("search")?.toLowerCase() || "";
+
+
 
     useEffect(() => {
         async function fetchRecipes() {
@@ -47,6 +56,12 @@ export default function ViewRecipes() {
 
     const navigate = useNavigate();
 
+    const filteredRecipes = recipes.filter(recipe =>
+        recipe.title.toLowerCase().includes(searchTerm)
+
+    );
+
+
     return (
         <Layout>
             <div className="max-w-4xl mx-auto p-4">
@@ -58,60 +73,38 @@ export default function ViewRecipes() {
                     </div>
                 )}
 
+
                 {recipes.length === 0 ? (
+
                     <p>No recipes found.</p>
                 ) : (
                         <ul className="space-y-4">
-                            {recipes.map((recipe) => (
-                                <div key={recipe.id} className="border rounded p-4 shadow mb-4 bg-white">
-                                    {/* ✅ Image if present */}
-                                    {recipe.imagePath && (
-                                        <div className="aspect-[4/3] w-full mb-3 rounded overflow-hidden bg-gray-100">
-                                            <img
-                                                src={`${process.env.REACT_APP_IMAGE_BASE_URL}${recipe.imagePath}`}
-                                                alt={recipe.title}
-                                                className="w-full h-full object-cover"                                        />
+                            {filteredRecipes.length === 0 ? (
+                                <p>No matching recipes.</p>
+                            ) : (
+                                filteredRecipes.map((recipe) => (
+                                    <Link key={recipe.id} to={`/recipe/${recipe.id}`}>
+
+                                        <div className="border rounded p-4 shadow mb-4 bg-white hover:bg-gray-100 cursor-pointer">
+                                            <h2 className="text-xl font-semibold">{recipe.title}</h2>
+
+                                            {/* ✅ Image if present */}
+                                            {recipe.imagePath && (
+                                                <div className="aspect-[4/3] w-full mb-3 rounded overflow-hidden bg-gray-100">
+                                                    <img
+                                                        src={`${process.env.REACT_APP_IMAGE_BASE_URL}${recipe.imagePath}`}
+                                                        alt={recipe.title}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                </div>
+                                            )}
+
+                                            <p className="text-gray-600 mb-2">{recipe.description}</p>
                                         </div>
-
-                                    )}
-
-                                    <h2 className="text-xl font-semibold">{recipe.title}</h2>
-                                    <p className="text-gray-600 mb-2">{recipe.description}</p>
-
-                                    <h2 className="text-xl font-semibold">{recipe.title}</h2>
-                                    <p className="text-gray-700 italic">{recipe.description}</p>
-
-                                    {/* Ingredients */}
-                                    <h3 className="font-semibold mt-2">Ingredients:</h3>
-                                    <ul className="list-disc pl-6">
-                                        {recipe.ingredients.map((ing, idx) => (
-                                            <li key={idx}>{ing}</li>
-                                        ))}
-                                    </ul>
-
-                                    {/* Steps */}
-                                    <h3 className="font-semibold mt-2">Steps:</h3>
-                                    <ol className="list-decimal pl-6">
-                                        {recipe.steps.map((step, idx) => (
-                                            <li key={idx}>{step}</li>
-                                        ))}
-                                    </ol>
-                                    <button
-                                        onClick={() => handleDelete(recipe.id)}
-                                        className="mt-4 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
-                                    >
-                                        Delete
-                                    </button>
-                                    <button
-                                        onClick={() => navigate(`/edit/${recipe.id}`)}
-                                        className="ml-2 bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
-                                    >
-                                        Edit
-                                    </button>
-                                </div>
-                            ))}
-                        </ul>
-
+                                    </Link>
+                                ))
+                            )}
+                        </ul>                       
                 )}
             </div>
         </Layout>

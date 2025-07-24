@@ -6,6 +6,7 @@ import EditRecipe from './pages/EditRecipe';
 import ViewRecipes from './pages/ViewRecipes';
 import Login from './pages/Login';
 import ViewRecipe from "./pages/ViewRecipe";
+import RecipeDetails from './pages/RecipeDetails';
 
 function App() {
     return (
@@ -19,6 +20,8 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/recipe/:id" element={<ViewRecipe />} />
                 <Route path="/view/:id" element={<ViewRecipe />} />
+                <Route path="/recipe/:id" element={<RecipeDetails />} />
+                <Route path="/edit-recipe/:id" element={<EditRecipe />} /> 
             </Routes>
         </Router>
     );
