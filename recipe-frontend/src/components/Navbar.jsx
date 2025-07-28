@@ -1,3 +1,4 @@
+import React from 'react';
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import NavLinkPill from "./NavLinkPill";
@@ -9,7 +10,7 @@ export default function Navbar() {
     const handleSearchSubmit = (e) => {
         e.preventDefault();
         if (searchTerm.trim()) {
-            navigate(`/view?search=${encodeURIComponent(searchTerm.trim())}`);
+            navigate(`/recipes?search=${encodeURIComponent(searchTerm.trim())}`);
             setSearchTerm("");
         }
     };
@@ -19,7 +20,7 @@ export default function Navbar() {
             <ul className="flex gap-4">
                 <li><NavLinkPill to="/" label="Home" /></li>
                 <li><NavLinkPill to="/add" label="Add Recipe" /></li>
-                <li><NavLinkPill to="/view" label="View Recipes" /></li>
+                <li><NavLinkPill to="/recipes" label="View Recipes" /></li>
                 <li><NavLinkPill to="/login" label="Login" /></li>
             </ul>
 

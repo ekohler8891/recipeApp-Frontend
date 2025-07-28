@@ -1,3 +1,4 @@
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
@@ -11,7 +12,8 @@ import RecipeDetails from './pages/RecipeDetails';
 function App() {
     return (
         <Router>
-            <Navbar /> {}
+            <Navbar /> { }
+            {/* old routes
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/add" element={<AddRecipe />} />
@@ -22,6 +24,15 @@ function App() {
                 <Route path="/view/:id" element={<ViewRecipe />} />
                 <Route path="/recipe/:id" element={<RecipeDetails />} />
                 <Route path="/edit-recipe/:id" element={<EditRecipe />} /> 
+            </Routes>
+            */}
+            <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/add" element={<AddRecipe />} />
+                <Route path="/edit/:id" element={<EditRecipe />} />
+                <Route path="/recipes" element={<ViewRecipes />} />
+                <Route path="/recipe/:id" element={<ViewRecipe />} />
+                <Route path="/login" element={<Login />} />
             </Routes>
         </Router>
     );
