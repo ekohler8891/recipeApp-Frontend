@@ -1,9 +1,15 @@
-import React from 'react';
-import { useState } from "react";
+/**
+ * AddRecipe
+ * --
+ * Page for adding a recipe in for the first time.
+ * Can add images and plan for future will have a import function.
+ */
+import React, { useState } from "react";
 import Layout from "../components/Layout";
 
 
 export default function AddRecipe() {
+    // Form state
     const [formData, setFormData] = useState({
         title: "",
         description: "",
@@ -11,27 +17,22 @@ export default function AddRecipe() {
         steps: "",
         imagePath: ""
     });
-
-    //images
     const [imageFile, setImageFile] = useState(null);
 
-    // error
+    // Feedback state
     const [error, setError] = useState("");
-    // success
     const [success, setSuccess] = useState("");
 
+    // Handle text input changes
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value
-        }));
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
+    //Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Reset messages
         setError("");
         setSuccess("");
 
@@ -39,9 +40,8 @@ export default function AddRecipe() {
         const description = formData.description.trim();
         const ingredientsInput = formData.ingredients.trim();
         const stepsInput = formData.steps.trim();
-        const formDataImage = new FormData();
 
-        if (!title || !description || !ingredientsInput || !stepsInput) {
+        if (!title || !description || !ingredientsInput.length === 0 || !stepsInput.length === 0) {
             setError("All fields are required.");
             return;
         }
@@ -49,33 +49,27 @@ export default function AddRecipe() {
         const recipe = {
             title,
             description,
-            ingredients: ingredientsInput.split(",").map((i) => i.trim()).filter(Boolean),
-            steps: stepsInput.split("\n").map((s) => s.trim()).filter(Boolean),
-            imagePath: null 
+            ingredients: ingredientsInput,
+            steps: stepsInput,
+            imagePath: null
         };
 
-        // ✅ Upload image if selected
+        
+        // Upload image if selected
         if (imageFile) {
-            
-            formDataImage.append("file", imageFile);
+            const uploadData = new FormData();
+            uploadData.append("file", imageFile);
 
             try {
-                console.log("Uploading image file:", imageFile);
-                console.log("FormData entries:");
-                for (let pair of formDataImage.entries()) {
-                    console.log(pair[0], pair[1]);
-                }
-
-                const uploadRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/recipe/upload-new`, {
-                    method: "POST",
-                    body: formDataImage
-                });
-
-
+                const uploadRes = await fetch(
+                    `${process.env.REACT_APP_API_BASE_URL}/recipe/upload-new`,
+                    { method: "POST", body: uploadData }
+                );
                 if (!uploadRes.ok) throw new Error("Image upload failed");
 
                 const { path } = await uploadRes.json();
-                recipe.imagePath = path; // store path in recipe
+
+                recipe.imagePath = path;
             } catch (uploadErr) {
                 console.error(uploadErr);
                 setError("Image upload failed. Please try again.");
@@ -84,44 +78,37 @@ export default function AddRecipe() {
         }
 
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/recipe`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(recipe)
-            });
+            // Save recipe
+            const response = await fetch(
+                `${process.env.REACT_APP_API_BASE_URL}/recipe`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(recipe)
+                }
+            );
 
             if (!response.ok) throw new Error("Failed to save recipe.");
 
-            const savedRecipe = await response.json();
-            console.log("Saved to backend:", savedRecipe);
             setSuccess("Recipe saved successfully!");
-
-            // Reset form
-            setFormData({
-                title: "",
-                description: "",
-                ingredients: "",
-                steps: ""
-            });
+            setFormData({ title: "", description: "", ingredients: "", steps: ""});
             setImageFile(null);
 
             setTimeout(() => setSuccess(""), 3000);
         } catch (err) {
             console.error(err);
-            setError("There was a problem saving your recipe.");
+            setError(err.message || "An unexpected error occurred.");
         }
     };
 
 
 
     return (
-            <Layout>
+        <Layout>
             <div className="max-w-xl mx-auto p-4">
                 <h1 className="text-2xl font-bold mb-4">Add a New Recipe</h1>
 
-                {/* 🔻 Error Message */}
+                {/* Error Message */}
                 {error && (
                     <div className="bg-red-100 text-red-700 p-2 rounded border border-red-300 mb-4">
                         {error}

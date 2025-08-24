@@ -7,29 +7,16 @@ import EditRecipe from './pages/EditRecipe';
 import ViewRecipes from './pages/ViewRecipes';
 import Login from './pages/Login';
 import ViewRecipe from "./pages/ViewRecipe";
-import RecipeDetails from './pages/RecipeDetails';
+//import RecipeDetails from './pages/RecipeDetails';
 
 function App() {
     return (
         <Router>
             <Navbar /> { }
-            {/* old routes
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/add" element={<AddRecipe />} />
-                <Route path="/edit/:id" element={<EditRecipe />} />
-                <Route path="/view" element={<ViewRecipes />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/recipe/:id" element={<ViewRecipe />} />
-                <Route path="/view/:id" element={<ViewRecipe />} />
-                <Route path="/recipe/:id" element={<RecipeDetails />} />
-                <Route path="/edit-recipe/:id" element={<EditRecipe />} /> 
-            </Routes>
-            */}
-            <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/add" element={<AddRecipe />} />
-                <Route path="/edit/:id" element={<EditRecipe />} />
+                <Route path="/edit-recipe/:id" element={<EditRecipe />} />
                 <Route path="/recipes" element={<ViewRecipes />} />
                 <Route path="/recipe/:id" element={<ViewRecipe />} />
                 <Route path="/login" element={<Login />} />

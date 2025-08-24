@@ -1,46 +1,52 @@
-import React from 'react';
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+/**
+ * Home Page
+ * --
+ * The page where the user will start and at this point can navigate to recipe by index.
+ * Future plans will have this have be the launching point to go to recipes, 
+ * review shopping list, and update kitchen stock etc.
+ * 
+ */
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import Layout from "../components/Layout";
 
 export default function Home() {
-    const [index, setIndex] = useState("");
-    const [error, setError] = useState("");
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-
-        const recipes = JSON.parse(localStorage.getItem("recipes") || "[]");
-
-        if (!index || isNaN(index) || index < 0 || index >= recipes.length) {
-            setError("Please enter a valid recipe index.");
-            return;
-        }
-
-        setError("");
-        navigate(`/view/${index}`);
-    };
-
     return (
-        <div className="max-w-md mx-auto mt-10 p-4 border rounded shadow">
-            <h1 className="text-2xl font-bold mb-4">Welcome to Recipe App</h1>
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <input
-                    type="number"
-                    min="0"
-                    placeholder="Enter recipe index"
-                    value={index}
-                    onChange={(e) => setIndex(e.target.value)}
-                    className="w-full border p-2 rounded"
-                />
-                {error && <p className="text-red-600 text-sm">{error}</p>}
-                <button
-                    type="submit"
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded"
-                >
-                    View Recipe
-                </button>
-            </form>
-        </div>
+        <Layout>
+            <div className="max-w-2xl mx-auto text-center py-10">
+                <h1 className="text-3xl font-bold mb-6">🍲 Welcome to Recipe App</h1>
+                <p className="text-gray-600 mb-10">
+                    Your personal recipe manager. Add, edit, and browse your favorite
+                    recipes all in one place.
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    {/* Link navigation */}
+                    <Link
+                        to="/recipes"
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow"
+                    >
+                        📖 View Recipes
+                    </Link>
+
+                    {/* Button navigation */}
+                    <button
+                        onClick={() => navigate("/add")}
+                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow"
+                    >
+                        ➕ Add Recipe
+                    </button>
+
+                    <Link
+                        to="/login"
+                        className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg shadow"
+                    >
+                        🔑 Login
+                    </Link>
+                </div>
+            </div>
+        </Layout>
     );
 }

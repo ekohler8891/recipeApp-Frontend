@@ -48,7 +48,7 @@ export default function ViewRecipe() {
         <Layout>
             <div className="max-w-2xl mx-auto p-4">
                 <h1 className="text-3xl font-bold mb-2">{recipe.title}</h1>
-                {/* ✅ Image if present */}
+                {/* Image if present */}
                 {recipe.imagePath && (
                     <div className="aspect-[4/3] w-full mb-3 rounded overflow-hidden bg-gray-100">
                         <img
@@ -70,7 +70,7 @@ export default function ViewRecipe() {
                     {recipe.steps.map((step, idx) => <li key={idx}>{step}</li>)}
                 </ol>
 
-                {/* 🔘 Edit / Delete Buttons */}
+                {/* Edit / Delete Buttons */}
                 <div className="flex gap-4">
                     <button
                         onClick={() => navigate(`/edit-recipe/${id}`)}
