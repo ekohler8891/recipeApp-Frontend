@@ -9,11 +9,31 @@ export default function ViewRecipe() {
     const navigate = useNavigate();
     const [recipe, setRecipe] = useState(null);
     const [error, setError] = useState("");
+    const token = localStorage.getItem("token");
 
     useEffect(() => {
+        // Block access if no token
+        if (!token) {
+            navigate("/login");
+            return;
+        }
+
         const fetchRecipe = async () => {
             try {
-                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/recipe/${id}`);
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/recipe/${id}`,
+                    {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                        }//,
+                        //body: JSON.stringify(data)
+                    });
+
+                if (res.status === 401) {
+                    localStorage.removeItem("token");
+                    navigate("/login");
+                }
                 if (!res.ok) throw new Error("Recipe not found.");
                 const data = await res.json();
                 setRecipe(data);
@@ -30,8 +50,17 @@ export default function ViewRecipe() {
 
         try {
             const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/recipe/${id}`, {
-                method: "DELETE"
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                }
             });
+
+            if (res.status === 401) {
+                localStorage.removeItem("token");
+                navigate("/login");
+            }
 
             if (!res.ok) throw new Error("Delete failed.");
             navigate("/recipes"); // go back to list after delete
@@ -47,7 +76,7 @@ export default function ViewRecipe() {
     return (
         <Layout>
             <div className="max-w-2xl mx-auto p-4">
-                <h1 className="text-3xl font-bold mb-2">{recipe.title}</h1>
+                <h1 className="text-3xl font-bold mb-2">{recipe.title}{recipe.id}</h1>
                 {/* Image if present */}
                 {recipe.imagePath && (
                     <div className="aspect-[4/3] w-full mb-3 rounded overflow-hidden bg-gray-100">

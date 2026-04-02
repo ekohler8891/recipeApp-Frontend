@@ -14,11 +14,32 @@ export default function RecipeDetails() {
     const [recipe, setRecipe] = useState(null);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true);
+    const token = localStorage.getItem("token");
+
 
     useEffect(() => {
+        // Block access if no token
+        if (!token) {
+            navigate("/login");
+            return;
+        }
+
         async function fetchRecipe() {
             try {
-                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/recipe/${id}`);
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/recipe/${id}`,
+                    {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                        },
+                        body: JSON.stringify(data)
+                    }
+                );
+                if (res.status === 401) {
+                    localStorage.removeItem("token");
+                    navigate("/login");
+                }
                 if (!res.ok) throw new Error("Recipe not found.");
                 const data = await res.json();
                 setRecipe(data);
@@ -38,6 +59,11 @@ export default function RecipeDetails() {
         try {
             const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/recipe/${id}`, {
                 method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                }//,
+                //body: JSON.stringify(data)
             });
 
             if (!res.ok) throw new Error("Delete failed.");

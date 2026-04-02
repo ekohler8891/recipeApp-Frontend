@@ -27,11 +27,34 @@ export default function EditRecipe() {
     const [success, setSuccess] = useState("");
     const [loading, setLoading] = useState(true);
 
+    // Token
+    const token = localStorage.getItem("token");
+
+
     // Load recipe user defined fields when component mounts
     useEffect(() => {
+        // Block access if no token
+        if (!token) {
+            navigate("/login");
+            return;
+        }
+
         const fetchRecipe = async () => {
             try {
-                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/recipe/${id}`);
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/recipe/${id}`,
+                    {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                        }//,
+                        //body: JSON.stringify(data)
+                    }
+                );
+                if (res.status === 401) {
+                    localStorage.removeItem("token");
+                    navigate("/login");
+                }
                 if (!res.ok) {
                     // Redirect if recipe not found
                     navigate("/"); 
@@ -83,6 +106,8 @@ export default function EditRecipe() {
         const description = formData.description.trim();
         const ingredientsArr = formData.ingredients.split(",").map((i) => i.trim()).filter(Boolean);
         const stepsArr = formData.steps.split("\n").map((s) => s.trim()).filter(Boolean);
+        const token = localStorage.getItem("token");
+
 
         if (!title || !description || ingredientsArr.length === 0 || stepsArr.length === 0) {
             setError("All fields are required.");
@@ -98,8 +123,18 @@ export default function EditRecipe() {
             try {
                 const uploadRes = await fetch(
                     `${process.env.REACT_APP_API_BASE_URL}/recipe/upload?oldImagePath=${encodeURIComponent(updatedImagePath || "")}`,
-                    { method: "POST", body: imageForm }
-                );
+                    {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        },
+                        body: imageForm
+                    }
+                ); 
+                if (uploadRes.status === 401) {
+                    localStorage.removeItem("token");
+                    navigate("/login");
+                }
                 if (!uploadRes.ok) throw new Error("Image upload failed");
                 const { path } = await uploadRes.json();
                 updatedImagePath = path;
@@ -114,7 +149,10 @@ export default function EditRecipe() {
         try {
             const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/recipe/${id}`, {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
                 body: JSON.stringify({
                     id: formData.id,
                     title,
@@ -124,10 +162,14 @@ export default function EditRecipe() {
                     imagePath: updatedImagePath
                 })
             });
+            if (res.status === 401) {
+                localStorage.removeItem("token");
+                navigate("/login");
+            }
             if (!res.ok) throw new Error("Failed to update recipe");
 
             setSuccess("Recipe updated successfully!");
-            setTimeout(() => navigate(`/view-recipe/${id}`), 1500);
+            setTimeout(() => navigate(`/recipe/${id}`), 1500);
         } catch (err) {
             console.error(err);
             setError("There was a problem updating your recipe.");

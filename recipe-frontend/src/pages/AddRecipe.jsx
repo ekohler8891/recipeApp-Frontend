@@ -4,8 +4,9 @@
  * Page for adding a recipe in for the first time.
  * Can add images and plan for future will have a import function.
  */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Layout from "../components/Layout";
+import { useNavigate } from "react-router-dom";
 
 
 export default function AddRecipe() {
@@ -13,8 +14,8 @@ export default function AddRecipe() {
     const [formData, setFormData] = useState({
         title: "",
         description: "",
-        ingredients: "",
-        steps: "",
+        ingredients: [""],
+        steps: [""],
         imagePath: ""
     });
     const [imageFile, setImageFile] = useState(null);
@@ -29,6 +30,17 @@ export default function AddRecipe() {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
+    // Token Auth
+    const token = localStorage.getItem("token");
+    // Back to login back
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!token) {
+            navigate("/login");
+        }
+    }, [token, navigate]);
+
     //Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -38,10 +50,17 @@ export default function AddRecipe() {
 
         const title = formData.title.trim();
         const description = formData.description.trim();
-        const ingredientsInput = formData.ingredients.trim();
-        const stepsInput = formData.steps.trim();
+        const ingredients = formData.ingredients
+            .split(",")
+            .map(i => i.trim())
+            .filter(i => i.length > 0);
 
-        if (!title || !description || !ingredientsInput.length === 0 || !stepsInput.length === 0) {
+        const steps = formData.steps
+            .split("\n")
+            .map(s => s.trim())
+            .filter(s => s.length > 0);
+
+        if (!title || !description || ingredients.length === 0 || steps.length === 0) {
             setError("All fields are required.");
             return;
         }
@@ -49,8 +68,8 @@ export default function AddRecipe() {
         const recipe = {
             title,
             description,
-            ingredients: ingredientsInput,
-            steps: stepsInput,
+            ingredients: ingredients,
+            steps: steps,
             imagePath: null
         };
 
@@ -63,8 +82,18 @@ export default function AddRecipe() {
             try {
                 const uploadRes = await fetch(
                     `${process.env.REACT_APP_API_BASE_URL}/recipe/upload-new`,
-                    { method: "POST", body: uploadData }
+                    {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        },
+                        body: uploadData
+                    }
                 );
+                if (uploadRes.status === 401) {
+                    localStorage.removeItem("token");
+                    navigate("/login");
+                }
                 if (!uploadRes.ok) throw new Error("Image upload failed");
 
                 const { path } = await uploadRes.json();
@@ -83,25 +112,30 @@ export default function AddRecipe() {
                 `${process.env.REACT_APP_API_BASE_URL}/recipe`,
                 {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
                     body: JSON.stringify(recipe)
                 }
             );
-
+            if (response.status === 401) {
+                localStorage.removeItem("token");
+                navigate("/login");
+            }
             if (!response.ok) throw new Error("Failed to save recipe.");
 
             setSuccess("Recipe saved successfully!");
-            setFormData({ title: "", description: "", ingredients: "", steps: ""});
+            setFormData({ title: "", description: "", ingredients: [""], steps: [""]});
             setImageFile(null);
 
-            setTimeout(() => setSuccess(""), 3000);
+            setTimeout(() => navigate(`/recipes/`), 3000);
+
         } catch (err) {
             console.error(err);
             setError(err.message || "An unexpected error occurred.");
         }
     };
-
-
 
     return (
         <Layout>

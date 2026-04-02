@@ -24,28 +24,49 @@ export default function ViewRecipes() {
     const searchTerm = query.get("search") || "";
     const [searchInput, setSearchInput] = useState(searchTerm);
 
+    const token = localStorage.getItem("token");
+
     useEffect(() => {
-    async function fetchRecipes() {
-          try {
-            setLoading(true);
+        // Block access if no token
+        if (!token) {
+            navigate("/login");
+            return;
+        }
 
-            let url = `${process.env.REACT_APP_API_BASE_URL}/recipe`;
-            if (searchTerm) {
-              url += `?search=${encodeURIComponent(searchTerm)}`;
+        async function fetchRecipes() {
+            try {
+                setLoading(true);
+
+                let url = `${process.env.REACT_APP_API_BASE_URL}/recipe`;
+                if (searchTerm) {
+                    url += `?search=${encodeURIComponent(searchTerm)}`;
+                }
+
+                const response = await fetch(url, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+
+                // Handle expired/invalid token
+                if (response.status === 401) {
+                    localStorage.removeItem("token");
+                    navigate("/login");
+                    return;
+                }
+
+                if (!response.ok) throw new Error("Failed to fetch recipes.");
+
+                const data = await response.json();
+                setRecipes(data);
+                setLoading(false);
+            } catch (err) {
+                console.error(err);
+                setError("Unable to load recipes.");
+                setLoading(false);
             }
-            
-
-            const response = await fetch(url);
-            if (!response.ok) throw new Error("Failed to fetch recipes.");
-
-            const data = await response.json();
-            setRecipes(data);
-            setLoading(false);
-          } catch (err) {
-            console.error(err);
-            setError("Unable to load recipes.");
-            setLoading(false);
-          }
         }
 
         fetchRecipes();
@@ -57,7 +78,16 @@ export default function ViewRecipes() {
         try {
             const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/recipe/${id}`, {
                 method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                }
             });
+
+            if (response.status === 401) {
+                localStorage.removeItem("token");
+                navigate("/login");
+            }
 
             if (!response.ok) throw new Error("Failed to delete recipe.");
 
